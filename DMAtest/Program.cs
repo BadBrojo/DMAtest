@@ -1,6 +1,14 @@
 ﻿using System;
 using VmmFrost;
 
+public struct World
+{
+    public IntPtr PersistentLevel;
+    public IntPtr[] StreamingLevels;  // This is an array of pointers since it uses TArray in UE.
+    public IntPtr[] Levels;           // This is an array of pointers for the same reason.
+}
+
+
 namespace DMATest
 {
     class Program
@@ -28,6 +36,9 @@ namespace DMATest
             Console.WriteLine("Press any key to exit.");
             Console.ReadKey();
         }
+        //process manager
+        #region
+
 
         public class ProcessManager
         {
@@ -67,12 +78,18 @@ namespace DMATest
                 }
             }
         }
-
+        #endregion 
+        //memory worker
+        #region
         public class MemoryWorker
         {
             private readonly MemDMA _mem;
             private readonly uint _pid;
             private readonly ulong _moduleBase;
+            private const ulong UWorldOffset = 0x7B8F550;
+            private const ulong UObjectOffset = 0x7A21410;
+            private const ulong FNameOffset = 0x7981A80;
+
 
             public MemoryWorker(MemDMA mem, uint pid, ulong moduleBase)
             {
@@ -81,22 +98,60 @@ namespace DMATest
                 _moduleBase = moduleBase;
             }
 
+            public void ParseUWorldAddress()
+            {
+                try
+                {
+                    ulong uWorldAddress = _moduleBase + UWorldOffset; // Offset for UWorld
+                    ulong uWorldPtr = _mem.ReadValue<ulong>(_pid, uWorldAddress); // Read UWorld pointer
+                    Console.WriteLine($"UWorld address: {uWorldPtr:X}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error parsing UWorld address: {ex.Message}");
+                }
+            }
+            public void ParseUObjectAddress()
+            {
+                try
+                {
+                    ulong uObjectAddress = _moduleBase + UObjectOffset; // Offset for UObject
+                    ulong uObjectPtr = _mem.ReadValue<ulong>(_pid, uObjectAddress); // Read UObject pointer
+                    Console.WriteLine($"UObject address: {uObjectPtr:X}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error parsing UObject address: {ex.Message}");
+                }
+            }
+
             public void Run()
             {
                 Console.WriteLine("Worker started. Press 'q' to quit.");
                 while (true)
                 {
-                    // Implement your logic here.
-
                     // Listen for user input to break the loop.
                     ConsoleKeyInfo keyInfo = Console.ReadKey();
-                    if (keyInfo.KeyChar == 'q')
+                    switch (keyInfo.KeyChar)
                     {
-                        Console.WriteLine("\nExiting worker...");
-                        break;
+                        case '1':
+                            Console.WriteLine("\nParsing UWorld Address");
+                            ParseUWorldAddress();
+                            break;
+                        case '2':
+                            Console.WriteLine("\nParsing UObject Address");
+                            ParseUObjectAddress();
+                            break;
+                        case 'q':
+                            Console.WriteLine("\nExiting worker...");
+                            return; // break the loop by returning from the method.
+                        default:
+                            break;
                     }
                 }
             }
         }
+        #endregion
     }
 }
+
