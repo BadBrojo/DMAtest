@@ -8,7 +8,7 @@ namespace DMATest
         static void Main(string[] args)
         {
             Console.WriteLine("Starting DMATest...");
-
+            //
             try
             {
                 string[] initArgs = new string[] { "-printf", "-v", "-device", "fpga" };
