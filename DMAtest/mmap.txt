@@ -1,7 +1,0 @@
-1000      - 9ffff
-100000    - 9d81fff
-a000000   - a1fffff
-a20e000   - affffff
-b020000   - bb323fff
-bddff000  - beffffff
-100000000 - 103f37ffff
